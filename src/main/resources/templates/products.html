@@ -1,0 +1,15 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Products</title>
+</head>
+<body>
+<h2>Products</h2>
+<a href="/">Back</a>
+
+<ol>
+    <li th:each="i : ${items}" th:text="${i}"></li>
+</ol>
+</body>
+</html>

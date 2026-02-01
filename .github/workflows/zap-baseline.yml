@@ -1,0 +1,54 @@
+name: ZAP Baseline Scan
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  zap_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t demo-zap .
+
+      - name: Run app container
+        run: docker run -d --name app -p 8080:8080 demo-zap
+
+      - name: Wait for health
+        run: |
+          for i in {1..40}; do
+            if curl -sSf http://localhost:8080/actuator/health >/dev/null; then
+              echo "App is up!"
+              exit 0
+            fi
+            echo "Waiting for app..."
+            sleep 2
+          done
+          echo "App did not start in time"
+          docker logs app || true
+          exit 1
+
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'http://localhost:8080'
+          cmd_options: '-a -j -m 3 -T 10'
+
+      - name: Upload ZAP report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: |
+            report_html.html
+            report_json.json
+            report_md.md
+            zap_scan.log
+
+      - name: Stop app
+        if: always()
+        run: docker rm -f app || true
