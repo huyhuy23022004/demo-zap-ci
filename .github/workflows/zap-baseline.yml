@@ -6,8 +6,7 @@ on:
     branches: ["main"]
   pull_request:
 
-# (QUAN TRỌNG) cho phép action tạo issue (nếu bạn muốn),
-# và vẫn đọc được repo để checkout code
+
 permissions:
   contents: read
   issues: write
