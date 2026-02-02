@@ -3,13 +3,8 @@ name: ZAP Baseline Scan
 on:
   workflow_dispatch:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   pull_request:
-
-
-permissions:
-  contents: read
-  issues: write
 
 jobs:
   zap_scan:
@@ -42,20 +37,18 @@ jobs:
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
-          target: "http://localhost:8080"
+          target: 'http://localhost:8080'
           cmd_options: "-a -j -m 3 -T 10 -I -d"
 
-      # (QUAN TRỌNG) luôn upload dù job đỏ
       - name: Upload ZAP report artifact
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
           path: |
-            /zap/wrk/report_html.html
-            /zap/wrk/report_json.json
-            /zap/wrk/report_md.md
-            /zap/wrk/zap_scan.log
+            report_html.html
+            report_json.json
+            report_md.md
+            zap_scan.log
 
       - name: Stop app
         if: always()
