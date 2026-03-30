@@ -18,7 +18,7 @@ public class SecurityConfig {
                 // demo app => để ZAP thấy được nhiều cảnh báo, ta tắt CSRF (giải thích trong báo cáo)
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/products", "/login", "/css/**", "/actuator/health").permitAll()
+                        .requestMatchers("/", "/products", "/login", "/error", "/css/**", "/actuator/health", "/h2-console/**").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

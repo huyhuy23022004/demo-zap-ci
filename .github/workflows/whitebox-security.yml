@@ -1,0 +1,60 @@
+name: White-Box Security (SAST & Unit Test & SCA)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  sast_and_test:
+    name: "SAST + Unit Test + Coverage + SCA"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      # ---- Step 1: Chạy Unit Test + tự động sinh JaCoCo Coverage Report ----
+      - name: Run Security Unit Tests + JaCoCo Coverage
+        run: mvn test
+
+      # ---- Step 2: Upload JaCoCo Coverage Report ----
+      - name: Upload JaCoCo Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: JaCoCo-Coverage-Report
+          path: target/site/jacoco/
+
+      # ---- Step 3: Chạy SpotBugs SAST Scan ----
+      - name: Run SpotBugs SAST Scan
+        run: mvn compile spotbugs:spotbugs -Dspotbugs.xmlOutput=true
+        continue-on-error: true
+
+      - name: Upload SAST Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: SAST-SpotBugs-Report
+          path: target/spotbugsXml.xml
+
+      # ---- Step 4: Chạy OWASP Dependency-Check (SCA) ----
+      - name: Run OWASP Dependency-Check (SCA)
+        run: mvn dependency-check:check
+        continue-on-error: true
+
+      - name: Upload SCA Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: SCA-Dependency-Check-Report
+          path: |
+            target/dependency-check-report.html
+            target/dependency-check-report.json
