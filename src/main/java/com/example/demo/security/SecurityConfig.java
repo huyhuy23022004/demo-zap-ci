@@ -22,6 +22,12 @@ public class SecurityConfig {
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
+                // Cứng hóa Security Headers bảo vệ ứng dụng
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())    // Chống Clickjacking
+                        .xssProtection(xss -> xss.disable())  // Tắt XSS mặc định đôi khi bị cấu hình riêng
+                        .contentTypeOptions(content -> content.disable()) // Để default
+                )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .defaultSuccessUrl("/", true)
